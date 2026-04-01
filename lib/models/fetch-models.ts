@@ -342,6 +342,36 @@ export async function fetchOllamaModels(): Promise<Model[]> {
   }
 }
 
+export async function fetchCerebrasModels(): Promise<Model[]> {
+  if (!isProviderEnabled('cerebras')) {
+    return []
+  }
+
+  try {
+    const json = await fetchJson('https://api.cerebras.ai/v1/models', {
+      Authorization: `Bearer ${process.env.CEREBRAS_API_KEY}`
+    })
+
+    const data = Array.isArray(json?.data) ? json.data : []
+    return sortModels(
+      dedupeModels(
+        data
+          .map(item => String(item?.id ?? ''))
+          .filter(Boolean)
+          .map(id => ({
+            id,
+            name: id,
+            provider: 'Cerebras',
+            providerId: 'cerebras'
+          }))
+      )
+    )
+  } catch (error) {
+    console.warn('[ModelFetch] Failed to fetch Cerebras models:', error)
+    return []
+  }
+}
+
 export async function fetchGatewayModels(): Promise<Model[]> {
   if (!isProviderEnabled('gateway')) {
     return []
@@ -389,16 +419,25 @@ export async function fetchAvailableModels(options?: {
     return modelsCache.value
   }
 
-  const [openai, anthropic, google, ollama, gateway] = await Promise.all([
-    fetchOpenAIModels(),
-    fetchAnthropicModels(),
-    fetchGoogleModels(),
-    fetchOllamaModels(),
-    fetchGatewayModels()
-  ])
+  const [openai, anthropic, google, cerebras, ollama, gateway] =
+    await Promise.all([
+      fetchOpenAIModels(),
+      fetchAnthropicModels(),
+      fetchGoogleModels(),
+      fetchCerebrasModels(),
+      fetchOllamaModels(),
+      fetchGatewayModels()
+    ])
 
   const grouped = groupByProvider(
-    dedupeModels([...openai, ...anthropic, ...google, ...ollama, ...gateway])
+    dedupeModels([
+      ...openai,
+      ...anthropic,
+      ...google,
+      ...cerebras,
+      ...ollama,
+      ...gateway
+    ])
   )
 
   // Keep stable ordering for each provider list.

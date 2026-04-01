@@ -17,6 +17,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
   google: 'Google',
+  cerebras: 'Cerebras',
   ollama: 'Ollama',
   gateway: 'Gateway',
   'openai-compatible': 'OpenAI Compatible'
