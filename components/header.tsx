@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
@@ -34,6 +35,9 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
         <div></div>
 
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/blog">Blog</Link>
+          </Button>
           {isRootPage && (
             <Button
               variant="outline"
