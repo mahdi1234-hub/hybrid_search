@@ -1,7 +1,7 @@
 import { Langfuse } from 'langfuse'
 
 import { updateMessageFeedback } from '@/lib/actions/feedback'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUserId } from '@/lib/auth/get-current-user'
 import { isTracingEnabled } from '@/lib/utils/telemetry'
 
 export async function POST(req: Request) {
@@ -45,17 +45,8 @@ export async function POST(req: Request) {
     await langfuse.flushAsync()
 
     // Get current user for RLS context
-    let userId: string | null = null
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (supabaseUrl && supabaseAnonKey) {
-      const supabase = await createClient()
-      const {
-        data: { user }
-      } = await supabase.auth.getUser()
-      userId = user?.id || null
-    }
+    const currentUserId = await getCurrentUserId()
+    const userId: string | null = currentUserId || null
 
     // Update the message metadata with the feedback score using the action
     if (messageId) {

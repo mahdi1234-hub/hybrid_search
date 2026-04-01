@@ -2,12 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 
-import { User } from '@supabase/supabase-js'
 import { Link2, LogOut, Palette } from 'lucide-react'
 
-import { createClient } from '@/lib/supabase/client'
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,15 +22,12 @@ import { ExternalLinkItems } from './external-link-items'
 import { ThemeMenuItems } from './theme-menu-items'
 
 interface UserMenuProps {
-  user: User
+  user: { id: string; email: string; name?: string }
 }
 
 export default function UserMenu({ user }: UserMenuProps) {
   const router = useRouter()
-  const userName =
-    user.user_metadata?.full_name || user.user_metadata?.name || 'User'
-  const avatarUrl =
-    user.user_metadata?.avatar_url || user.user_metadata?.picture
+  const userName = user.name || user.email.split('@')[0] || 'User'
 
   const getInitials = (name: string, email: string | undefined) => {
     if (name && name !== 'User') {
@@ -50,8 +44,7 @@ export default function UserMenu({ user }: UserMenuProps) {
   }
 
   const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await fetch('/api/auth/logout', { method: 'POST' })
     router.push('/')
     router.refresh()
   }
@@ -61,7 +54,6 @@ export default function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-6 w-6 rounded-full">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={avatarUrl} alt={userName} />
             <AvatarFallback>{getInitials(userName, user.email)}</AvatarFallback>
           </Avatar>
         </Button>
@@ -99,7 +91,7 @@ export default function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Logout</span>
+          <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

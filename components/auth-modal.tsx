@@ -26,18 +26,15 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             <IconLogo className="size-14" />
           </div>
           <DialogTitle className="text-xl font-semibold">
-            Continue with I Love You Slayma
+            Welcome to Slayma
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            To use I Love You Slayma, sign in to your account or create a new one.
+            Sign in with your email to start using Slayma AI Search.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-6 space-y-3">
           <Button asChild className="w-full" size="lg">
-            <Link href="/auth/sign-up">Sign Up</Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full" size="lg">
-            <Link href="/auth/login">Sign In</Link>
+            <Link href="/auth/login">Sign In with Email</Link>
           </Button>
         </div>
       </DialogContent>

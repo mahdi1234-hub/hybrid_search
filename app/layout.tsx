@@ -3,9 +3,8 @@ import { Inter as FontSans } from 'next/font/google'
 
 import { Analytics } from '@vercel/analytics/next'
 
-import { getCurrentUserId } from '@/lib/auth/get-current-user'
+import { getCurrentUser, getCurrentUserId } from '@/lib/auth/get-current-user'
 import { UserProvider } from '@/lib/contexts/user-context'
-import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 
 import { SidebarProvider } from '@/components/ui/sidebar'
@@ -23,14 +22,17 @@ const fontSans = FontSans({
   variable: '--font-sans'
 })
 
-const title = 'I Love You Slayma'
+const title = 'Slayma - AI Hybrid Search'
 const description =
-  'An AI-powered hybrid search engine with Cerebras LLM and Tavily integration.'
+  'An AI-powered hybrid search engine with intelligent chat and advanced search capabilities.'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://github.com/mahdi1234-hub/hybrid_search'),
+  metadataBase: new URL('https://slayma.vercel.app'),
   title,
   description,
+  icons: {
+    icon: '/logo.svg'
+  },
   openGraph: {
     title,
     description
@@ -38,8 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     title,
     description,
-    card: 'summary_large_image',
-    creator: '@miiura'
+    card: 'summary_large_image'
   }
 }
 
@@ -55,18 +56,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  let user = null
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (supabaseUrl && supabaseAnonKey) {
-    const supabase = await createClient()
-    const {
-      data: { user: supabaseUser }
-    } = await supabase.auth.getUser()
-    user = supabaseUser
-  }
-
+  const user = await getCurrentUser()
   const userId = user?.id ?? (await getCurrentUserId())
 
   return (
