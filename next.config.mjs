@@ -25,6 +25,12 @@ const nextConfig = {
         hostname: 'www.google.com',
         port: '',
         pathname: '/s2/favicons/**' // Google Favicon API
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.marblecms.com',
+        port: '',
+        pathname: '/**' // MarbleCMS media
       }
     ]
   }

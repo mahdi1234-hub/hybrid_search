@@ -1,10 +1,8 @@
 'use client'
 
-// import Link from 'next/link' // No longer needed directly here for Sign In button
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-
-import { User } from '@supabase/supabase-js'
 
 import { cn } from '@/lib/utils'
 
@@ -12,12 +10,11 @@ import { useSidebar } from '@/components/ui/sidebar'
 
 import { Button } from './ui/button'
 import { FeedbackModal } from './feedback-modal'
-// import { Button } from './ui/button' // No longer needed directly here for Sign In button
-import GuestMenu from './guest-menu' // Import the new GuestMenu component
+import GuestMenu from './guest-menu'
 import UserMenu from './user-menu'
 
 interface HeaderProps {
-  user: User | null
+  user: { id: string; email: string } | null
 }
 
 export const Header: React.FC<HeaderProps> = ({ user }) => {
@@ -35,10 +32,12 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
           'w-full'
         )}
       >
-        {/* This div can be used for a logo or title on the left if needed */}
         <div></div>
 
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/blog">Blog</Link>
+          </Button>
           {isRootPage && (
             <Button
               variant="outline"

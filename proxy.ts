@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { updateSession } from '@/lib/supabase/middleware'
+import { jwtVerify } from 'jose'
+
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'slayma-default-secret-change-in-production'
+)
 
 export async function proxy(request: NextRequest) {
   // Get the protocol from X-Forwarded-Proto header or request protocol
@@ -11,43 +15,42 @@ export async function proxy(request: NextRequest) {
   const host =
     request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
 
-  // Construct the base URL - ensure protocol has :// format
+  // Construct the base URL
   const baseUrl = `${protocol}${protocol.endsWith(':') ? '//' : '://'}${host}`
 
-  // Create a response
-  let response: NextResponse
+  // Check JWT session cookie
+  const sessionToken = request.cookies.get('slayma-session')?.value
+  let isAuthenticated = false
 
-  // Handle Supabase session if configured
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (supabaseUrl && supabaseAnonKey) {
-    response = await updateSession(request)
-  } else {
-    // If Supabase is not configured, just pass the request through
-    response = NextResponse.next({
-      request
-    })
+  if (sessionToken) {
+    try {
+      await jwtVerify(sessionToken, JWT_SECRET)
+      isAuthenticated = true
+    } catch {
+      // Invalid token
+    }
   }
 
-  // Add request information to response headers
-  response.headers.set('x-url', request.url)
-  response.headers.set('x-host', host)
-  response.headers.set('x-protocol', protocol)
+  // Auth disabled mode
+  if (process.env.ENABLE_AUTH === 'false') {
+    isAuthenticated = true
+  }
+
+  const response = NextResponse.next({ request })
+
+  // Define public paths
+  const publicPaths = ['/', '/auth', '/share', '/api']
+  const pathname = request.nextUrl.pathname
+
+  // Redirect to login if not authenticated and path is not public
+  if (!isAuthenticated && !publicPaths.some(path => pathname.startsWith(path))) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Set headers
   response.headers.set('x-base-url', baseUrl)
 
   return response
-}
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'
-  ]
 }

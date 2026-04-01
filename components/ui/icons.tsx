@@ -7,16 +7,24 @@ import { cn } from '@/lib/utils'
 function IconLogo({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
-      fill="currentColor"
-      viewBox="0 0 256 256"
+      viewBox="0 0 512 512"
+      fill="none"
       role="img"
       xmlns="http://www.w3.org/2000/svg"
       className={cn('h-4 w-4', className)}
       {...props}
     >
-      <circle cx="128" cy="128" r="128" fill="black"></circle>
-      <circle cx="102" cy="128" r="18" fill="white"></circle>
-      <circle cx="154" cy="128" r="18" fill="white"></circle>
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#6366f1"/>
+          <stop offset="50%" stopColor="#8b5cf6"/>
+          <stop offset="100%" stopColor="#ec4899"/>
+        </linearGradient>
+      </defs>
+      <rect width="512" height="512" rx="96" fill="url(#logoGrad)"/>
+      <text x="256" y="340" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="280" fontWeight="800" fill="white" letterSpacing="-8">S</text>
+      <circle cx="380" cy="120" r="18" fill="white" fillOpacity="0.9"/>
+      <circle cx="380" cy="120" r="8" fill="white"/>
     </svg>
   )
 }

@@ -1,18 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { getSession } from '@/lib/auth/session'
 import { perfLog } from '@/lib/utils/perf-logging'
 import { incrementAuthCallCount } from '@/lib/utils/perf-tracking'
 
 export async function getCurrentUser() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return null // Supabase is not configured
-  }
-
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getUser()
-  return data.user ?? null
+  const session = await getSession()
+  if (!session) return null
+  return { id: session.userId, email: session.email }
 }
 
 export async function getCurrentUserId() {
@@ -28,7 +21,6 @@ export async function getCurrentUserId() {
       )
     }
 
-    // Always warn when authentication is disabled (except in tests)
     if (process.env.NODE_ENV !== 'test') {
       console.warn(
         '⚠️  Authentication disabled. Running in anonymous mode.\n' +
