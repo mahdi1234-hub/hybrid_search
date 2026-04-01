@@ -10,6 +10,10 @@ const providers: Record<string, any> = {
   openai,
   anthropic,
   google,
+  cerebras: createOpenAI({
+    apiKey: process.env.CEREBRAS_API_KEY,
+    baseURL: 'https://api.cerebras.ai/v1'
+  }),
   'openai-compatible': createOpenAI({
     apiKey: process.env.OPENAI_COMPATIBLE_API_KEY,
     baseURL: process.env.OPENAI_COMPATIBLE_API_BASE_URL
@@ -42,6 +46,8 @@ export function isProviderEnabled(providerId: string): boolean {
       return !!process.env.ANTHROPIC_API_KEY
     case 'google':
       return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    case 'cerebras':
+      return !!process.env.CEREBRAS_API_KEY
     case 'openai-compatible':
       return (
         !!process.env.OPENAI_COMPATIBLE_API_KEY &&
