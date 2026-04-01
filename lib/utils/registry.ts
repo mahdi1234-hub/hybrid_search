@@ -14,6 +14,10 @@ const providers: Record<string, any> = {
     apiKey: process.env.CEREBRAS_API_KEY,
     baseURL: 'https://api.cerebras.ai/v1'
   }),
+  groq: createOpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: 'https://api.groq.com/openai/v1'
+  }),
   'openai-compatible': createOpenAI({
     apiKey: process.env.OPENAI_COMPATIBLE_API_KEY,
     baseURL: process.env.OPENAI_COMPATIBLE_API_BASE_URL
@@ -48,6 +52,8 @@ export function isProviderEnabled(providerId: string): boolean {
       return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
     case 'cerebras':
       return !!process.env.CEREBRAS_API_KEY
+    case 'groq':
+      return !!process.env.GROQ_API_KEY
     case 'openai-compatible':
       return (
         !!process.env.OPENAI_COMPATIBLE_API_KEY &&

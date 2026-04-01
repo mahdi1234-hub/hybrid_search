@@ -342,6 +342,53 @@ export async function fetchOllamaModels(): Promise<Model[]> {
   }
 }
 
+export async function fetchGroqModels(): Promise<Model[]> {
+  if (!isProviderEnabled('groq')) {
+    return []
+  }
+
+  try {
+    const json = await fetchJson('https://api.groq.com/openai/v1/models', {
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`
+    })
+
+    const data = Array.isArray(json?.data) ? json.data : []
+    const GROQ_EXCLUDED_KEYWORDS = [
+      'whisper',
+      'distil',
+      'guard',
+      'tts',
+      'vision',
+      'tool-use',
+      'versatile',
+      'specdec'
+    ]
+
+    return sortModels(
+      dedupeModels(
+        data
+          .map(item => String(item?.id ?? ''))
+          .filter(Boolean)
+          .filter(
+            id =>
+              !GROQ_EXCLUDED_KEYWORDS.some(kw =>
+                id.toLowerCase().includes(kw)
+              )
+          )
+          .map(id => ({
+            id,
+            name: id,
+            provider: 'Groq',
+            providerId: 'groq'
+          }))
+      )
+    )
+  } catch (error) {
+    console.warn('[ModelFetch] Failed to fetch Groq models:', error)
+    return []
+  }
+}
+
 export async function fetchCerebrasModels(): Promise<Model[]> {
   if (!isProviderEnabled('cerebras')) {
     return []
@@ -419,12 +466,13 @@ export async function fetchAvailableModels(options?: {
     return modelsCache.value
   }
 
-  const [openai, anthropic, google, cerebras, ollama, gateway] =
+  const [openai, anthropic, google, cerebras, groq, ollama, gateway] =
     await Promise.all([
       fetchOpenAIModels(),
       fetchAnthropicModels(),
       fetchGoogleModels(),
       fetchCerebrasModels(),
+      fetchGroqModels(),
       fetchOllamaModels(),
       fetchGatewayModels()
     ])
@@ -435,6 +483,7 @@ export async function fetchAvailableModels(options?: {
       ...anthropic,
       ...google,
       ...cerebras,
+      ...groq,
       ...ollama,
       ...gateway
     ])
