@@ -23,12 +23,12 @@ const fontSans = FontSans({
   variable: '--font-sans'
 })
 
-const title = 'Morphic'
+const title = 'I Love You Slayma'
 const description =
-  'A fully open-source AI-powered answer engine with a generative UI.'
+  'An AI-powered hybrid search engine with Cerebras LLM and Tavily integration.'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://morphic.sh'),
+  metadataBase: new URL('https://github.com/mahdi1234-hub/hybrid_search'),
   title,
   description,
   openGraph: {
