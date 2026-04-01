@@ -2,35 +2,23 @@
 
 import { useEffect, useState } from 'react'
 
-import { User } from '@supabase/supabase-js'
-
-import { createClient } from '@/lib/supabase/client'
+interface AuthUser {
+  id: string
+  email: string
+  name?: string
+}
 
 export function useAuthCheck() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let subscription: { unsubscribe: () => void } | null = null
-
     const checkAuth = async () => {
       try {
-        const supabase = createClient()
-
-        const {
-          data: { session }
-        } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
-
-        // Subscribe to auth changes
-        const {
-          data: { subscription: authSubscription }
-        } = supabase.auth.onAuthStateChange((event, session) => {
-          setUser(session?.user ?? null)
-        })
-        subscription = authSubscription
-      } catch (error) {
-        // Supabase not configured
+        const res = await fetch('/api/auth/me')
+        const data = await res.json()
+        setUser(data.user ?? null)
+      } catch {
         setUser(null)
       } finally {
         setLoading(false)
@@ -38,10 +26,6 @@ export function useAuthCheck() {
     }
 
     checkAuth()
-
-    return () => {
-      subscription?.unsubscribe()
-    }
   }, [])
 
   return { user, loading, isAuthenticated: !!user }
